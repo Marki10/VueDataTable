@@ -1,2 +1,0 @@
-# VueDataTable
-Created with CodeSandbox
