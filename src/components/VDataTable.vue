@@ -15,11 +15,17 @@
       </ul>
     </div>
     <div class="pagination">
-      <div class="button arrow-left"><</div>
-      <div class="numbers"><span class="button">1</span></div>
-      <div class="numbers"><span class="button">2</span></div>
-      <div class="button arrow-right">></div>
-      <div class="pages">{{ "321 pages" }}</div>
+      <div class="button arrow-left" @click="prevPage"><</div>
+      <div class="numbers">
+        <span
+          class="button"
+          @click="changeCurrentPage(item);"
+          v-for="item in this.paginationNumbers()"
+          >{{ item }}</span
+        >
+      </div>
+      <div class="button arrow-right" @click="nextPage">></div>
+      <div class="pages">{{ numberOfPages + "page" }}</div>
       <div class="result">{{ "321" }}</div>
     </div>
   </div>
@@ -34,7 +40,8 @@ export default {
       currentSort: "code",
       currentSortDir: "asc",
       pageSize: this.perPage,
-      currentPage: 1
+      currentPage: 1,
+      numberOfPages: Math.ceil(this.perPage / this.columns.length)
     };
   },
   methods: {
@@ -45,11 +52,20 @@ export default {
       this.currentSort = s;
     },
     nextPage: function() {
-      if (this.currentPage * this.pageSize < this.rows.length)
-        this.currentPage++;
+      if (this.currentPage < this.numberOfPages) this.currentPage++;
     },
     prevPage: function() {
       if (this.currentPage > 1) this.currentPage--;
+    },
+    changeCurrentPage: function(newPage) {
+      this.currentPage = newPage;
+    },
+    paginationNumbers: function() {
+      let pages = [];
+      for (let i = 0; i < this.numberOfPages; i++) {
+        pages.push(i + 1);
+      }
+      return pages;
     }
   },
   computed: {
@@ -62,7 +78,11 @@ export default {
           if (a[this.currentSort] > b[this.currentSort]) return 1 * modifier;
           return 0;
         })
-        .splice(0, 5);
+        .filter((row, index) => {
+          let start = (this.currentPage - 1) * this.pageSize;
+          let end = this.currentPage * this.pageSize;
+          if (index >= start && index < end) return true;
+        });
     }
   }
 };
