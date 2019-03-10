@@ -1,6 +1,6 @@
 <template>
   <div id="app">
-    <v-data-table :columns="columns" :rows="campaigns" :per-page="4" />
+    <v-data-table :columns="columns" :rows="extraContent" :per-page="9" />
   </div>
 </template>
 
@@ -13,8 +13,24 @@ export default {
   components: {
     VDataTable
   },
+  methods: {
+    generateExtraContent: function() {
+      let array = [];
+      for (let i = 0; i < 150; i++) {
+        let item = {
+          code: "Camar" + i,
+          startDate: new Date(2019, 2, Math.floor(Math.random() * 20)),
+          sales: Math.floor(Math.random() * 9991)
+        };
+
+        array.push(item);
+      }
+      return array;
+    }
+  },
   data() {
     return {
+      extraContent: this.generateExtraContent(),
       columns: [
         {
           dataKey: "code",
@@ -80,4 +96,12 @@ export default {
 };
 </script>
 
-<style></style>
+<style lang="scss">
+@import "./assets/styles/variables.scss";
+
+body {
+  background: $background;
+  font-size: 15px;
+  font-family: sans-serif;
+}
+</style>

@@ -1,71 +1,74 @@
 <template>
   <div class="data-table">
     <div class="data-table__inner">
-      <ul class="table-header">
-        <li v-for="(item, key) in columns" :key="key">
-          <div class="col" @click="sort(item.dataKey);">{{ item.name }}</div>
-        </li>
-      </ul>
-      <ul class="table-content">
-        <li class="row" v-for="(item, key) in sortedRows" :key="key">
-          <div class="col">{{ item.code }}</div>
-          <div class="col">{{ item.startDate }}</div>
-          <div class="col">{{ item.sales }}</div>
-        </li>
-      </ul>
+      <TableHeader :columns="columnsExtraFields()" />
+      <TableContent
+        :rows="sortedRows"
+        :per-page="perPage"
+        :columns="columnsExtraFields()"
+      />
     </div>
-    <div class="pagination">
-      <div class="button arrow-left" @click="prevPage"><</div>
-      <div class="numbers">
-        <span
-          class="button"
-          @click="changeCurrentPage(item);"
-          v-for="item in this.paginationNumbers()"
-          >{{ item }}</span
-        >
-      </div>
-      <div class="button arrow-right" @click="nextPage">></div>
-      <div class="pages">{{ numberOfPages + "page" }}</div>
-      <div class="result">{{ "321" }}</div>
-    </div>
+    <Pagination :numberOfPages="numberOfPages" :rowsLength="this.rows.length" />
   </div>
 </template>
 
 <script>
+import TableHeader from "./TableHeader";
+import TableContent from "./TableContent";
+import Pagination from "./Pagination";
+
 export default {
   name: "VDataTable",
   props: ["columns", "rows", "perPage"],
+  components: {
+    TableHeader,
+    TableContent,
+    Pagination
+  },
   data: function() {
     return {
       currentSort: "code",
       currentSortDir: "asc",
       pageSize: this.perPage,
-      currentPage: 1,
-      numberOfPages: Math.ceil(this.perPage / this.columns.length)
+      numberOfPages: this.getNumberOfPages(),
+      currentPage: 1
     };
   },
   methods: {
+    getNumberOfPages: function() {
+      return Math.ceil(this.rows.length / this.perPage);
+    },
+    setCurrentPage: function(current) {
+      this.currentPage = current;
+    },
     sort: function(s) {
       if (s === this.currentSort) {
         this.currentSortDir = this.currentSortDir === "asc" ? "desc" : "asc";
       }
       this.currentSort = s;
     },
-    nextPage: function() {
-      if (this.currentPage < this.numberOfPages) this.currentPage++;
-    },
-    prevPage: function() {
-      if (this.currentPage > 1) this.currentPage--;
-    },
-    changeCurrentPage: function(newPage) {
-      this.currentPage = newPage;
-    },
-    paginationNumbers: function() {
-      let pages = [];
-      for (let i = 0; i < this.numberOfPages; i++) {
-        pages.push(i + 1);
+    columnsExtraFields: function() {
+      let newColumns = [];
+      for (let i = 0; i < this.columns.length; i++) {
+        newColumns.push(this.columns[i]);
+        if (this.columns[i].dataKey === "code") {
+          newColumns.push({
+            dataKey: "media",
+            name: "Media",
+            align: "left"
+          });
+        }
+        if (this.columns[i].dataKey === "startDate") {
+          newColumns.push({
+            dataKey: "lastOrder",
+            name: "Last Order",
+            align: "left"
+          });
+        }
       }
-      return pages;
+      newColumns.push({ dataKey: "ltv", name: "LTV", align: "left" });
+      newColumns.push({ dataKey: "cac", name: "CAC", align: "left" });
+      return newColumns;
     }
   },
   computed: {
@@ -89,70 +92,7 @@ export default {
 </script>
 
 <style lang="scss">
-$background: #f6f7f8;
-$even-color: #e6ebec;
-
-.data-table {
-  margin: 5px;
-
-  &__inner {
-    background: $background;
-  }
-}
-
-ul {
-  padding: 0;
-  margin: 0;
-
-  li {
-    list-style-type: none;
-  }
-}
-
-.table-header {
-  display: flex;
-}
-
-.row {
-  display: flex;
-
-  &:nth-child(even) {
-    background: $even-color;
-  }
-}
-.col {
-  padding: 10px;
-}
-
-.pagination {
-  width: 100%;
-  padding: 5px;
-  display: flex;
-}
-.button {
-  width: 25px;
-  height: 25px;
-  padding: 2px 0 0 8px;
-  box-sizing: border-box;
-  background: $even-color;
-  border: 1px solid #171;
-}
-
-.arrow-left {
-  border-radius: 5px 0 0 5px;
-}
-.arrow-right {
-  border-radius: 0 5px 5px 0;
-}
-.numbers {
-  display: flex;
-}
-.pages {
-  padding: 5px;
-  color: #555;
-}
-.result {
-  padding: 5px;
-  color: #555;
-}
+@import "../assets/styles/variables.scss";
+@import "../assets/styles/reset.scss";
+@import "./VDataTable.scss";
 </style>
